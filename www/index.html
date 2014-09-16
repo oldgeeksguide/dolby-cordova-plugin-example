@@ -1,14 +1,14 @@
 <!DOCTYPE html><!--HTML5 doctype-->
 <html>
 <head>
-	<title>Your New Application</title>
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" />
-	<style type="text/css">
-		/* Prevent copy paste for all elements except text fields */
-		*  { -webkit-user-select:none; -webkit-tap-highlight-color:rgba(255, 255, 255, 0); }
-		input, textarea  { -webkit-user-select:text; }
-		body { background-color:darkgrey; color:black }
+    <title>Your New Application</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" />
+    <style type="text/css">
+        /* Prevent copy paste for all elements except text fields */
+        *  { -webkit-user-select:none; -webkit-tap-highlight-color:rgba(255, 255, 255, 0); }
+        input, textarea  { -webkit-user-select:text; }
+        body { background-color:darkgrey; color:black }
         button {
             display: block;
             font-size: 150%;
@@ -27,7 +27,7 @@
             text-align: center;
             background: lightgrey;
         }
-        
+
         #profile-selection {
             width: 50%;
             margin: auto;
@@ -39,20 +39,22 @@
             display: none;
         }
 	</style>
-	<script src='intelxdk.js'></script>
-	<script src='cordova.js'></script>
-	<script type="text/javascript">
-        
+    <script src='intelxdk.js'></script>
+    <script src='cordova.js'></script>
+    <!-- test/mock.js includes a mock of the dolby object for testing when the dolby plugin or hardware isn't available -->
+    <!-- uncomment next line to use for testing/debugging -->
+    <!-- <script src='test/mock.js'></script> -->
+    <script type="text/javascript">
         function showDolbyStatus(deviceHasDolby) {
-            var e = document.getElementById('dolby-status');
-            
+            var e = dolbyStatusElmt();
+
             if (!deviceHasDolby) {
                 e.style.display = "none";
                 return;
             }
-            
+
             e.style.display = "block";
-            
+
             function success(status) {
                 if (status) {
                     showOn();
@@ -80,15 +82,19 @@
             //alert("Dolby Status set");
         }
 
+        function dolbyStatusElmt() {
+            return document.getElementById('dolby-status');
+        }
+
         function showOn() {
-            var e = document.getElementById('dolby-status');
+            var e = dolbyStatusElmt();
             e.style.background = "rgba(200,255,200,0.9)";
-            e.innerHTML="Dolby Audio is enabled";
+            e.innerHTML = "Dolby Audio is enabled";
         }
         function showOff() {
-            var e = document.getElementById('dolby-status');
+            var e = dolbyStatusElmt();
             e.style.background = "rgba(255,100,100,0.9)";
-            e.innerHTML="Dolby Audio is disabled";
+            e.innerHTML = "Dolby Audio is disabled";
         }
 
         function on() {
@@ -98,8 +104,8 @@
         function off() {
             dolby.dap.setEnabled(false);
             showOff();
-        }        
-        
+        }
+
         function initDolby() {
             if (typeof dolby === 'undefined') {
                 var e = document.getElementById('dolby-hardware');
@@ -110,22 +116,30 @@
             }
             function onDsConnected() {
                 alert("Device has Dolby capabilities");
-                showDolbyHardware(true)
+                showDolbyHardware(true);
             }
-        
+
             function onFail(err) {
                 alert("Device doesn't support Dolby Capabilities");
                 showDolbyHardware(false);
             }
-            dolby.dap.initialize(dolby.DapProfile.GAME, onDsConnected, onFail);
+            dolby.dap.initialize(dolby.DapProfile[getProfileUISetting()], onDsConnected, onFail);
         }
-        
+
+        function getProfileUISetting () {
+            // Return 'GAME' if there is any problem
+            var ret;
+
+            try {
+                ret = document.getElementById('profile-selection ').value;
+            } catch (e) {}
+            return ret || 'GAME';
+        }
+
         function changeProfile(profile) {
             dolby.dap.setProfile(dolby.DapProfile[profile]);
         }
-        
-		/* Intel native bridge is available */
-        
+
         var onDeviceReady=function() {
             //alert("Initializing");
             initDolby();
@@ -133,10 +147,9 @@
             intel.xdk.device.hideSplashScreen();
         };
         document.addEventListener("intel.xdk.device.ready",onDeviceReady,false);
-	</script>
+    </script>
 </head>
 <body>
-	<!-- content goes here-->
     <header>
         <div id="dolby-hardware">
             Checking hardware support
@@ -154,10 +167,10 @@
             <option value='VOICE'>Voice</option>
             <option value='MOVIE'>Movie</option>
         </select>
-        
+
     </header>
     <audio controls>
         <source src='audio/audio_dolby_living_room.m4a' type='audio/mp4'></source>
     </audio>
- </body>
+</body>
 </html>
